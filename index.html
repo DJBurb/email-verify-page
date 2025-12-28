@@ -119,14 +119,6 @@
           Your email address has been successfully verified. You’re ready to start using the app.
         </p>
 
-        <div class="actions">
-          <!-- TODO: Replace APP_LINK with your app deep link or website -->
-          <a id="openAppBtn" class="btn primary" href="APP_LINK">Open the app</a>
-          <a id="homeBtn" class="btn secondary" href="https://YOUR_DOMAIN_OR_APP_LANDING_PAGE">
-            Go to homepage
-          </a>
-        </div>
-
         <div class="small" id="details"></div>
       </main>
     </div>
@@ -164,7 +156,7 @@
         document.getElementById("badgeText").textContent = "Email verified";
         document.getElementById("title").textContent = "You’re all set!";
         document.getElementById("message").textContent =
-          "Your email address has been successfully verified. You’re ready to start using the app.";
+          "Your email address has been successfully verified. You may now return to the app and login.";
         document.getElementById("details").textContent = extra ? extra : "You can close this tab if you’re done.";
       }
 
