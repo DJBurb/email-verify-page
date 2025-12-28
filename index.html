@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Email Verified</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      :root {
+        --bg: #0b1220;
+        --card: rgba(255, 255, 255, 0.06);
+        --border: rgba(255, 255, 255, 0.12);
+        --text: #e9eefc;
+        --muted: rgba(233, 238, 252, 0.75);
+        --blue: #3b82f6;
+        --green: #22c55e;
+        --red: #ef4444;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 560px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(34, 197, 94, 0.35);
+        background: rgba(34, 197, 94, 0.15);
+      }
+      .badge.error {
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        background: rgba(239, 68, 68, 0.12);
+      }
+      .icon {
+        width: 28px;
+        height: 28px;
+        display: inline-grid;
+        place-items: center;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      h1 {
+        font-size: 24px;
+        margin: 18px 0 8px;
+      }
+      p {
+        margin: 0 0 16px;
+        line-height: 1.5;
+        color: var(--muted);
+      }
+      .actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+      .btn {
+        text-decoration: none;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid transparent;
+        cursor: pointer;
+      }
+      .primary {
+        background: var(--blue);
+        color: white;
+      }
+      .secondary {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .small {
+        font-size: 12px;
+        color: rgba(233, 238, 252, 0.65);
+        margin-top: 10px;
+      }
+      code {
+        background: rgba(255, 255, 255, 0.08);
+        padding: 2px 6px;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <main class="card" role="status" aria-live="polite">
+        <div id="badge" class="badge">
+          <span id="badgeIcon" class="icon">✅</span>
+          <span id="badgeText">Email verified</span>
+        </div>
+
+        <h1 id="title">You’re all set!</h1>
+        <p id="message">
+          Your email address has been successfully verified. You’re ready to start using the app.
+        </p>
+
+        <div class="actions">
+          <!-- TODO: Replace APP_LINK with your app deep link or website -->
+          <a id="openAppBtn" class="btn primary" href="APP_LINK">Open the app</a>
+          <a id="homeBtn" class="btn secondary" href="https://YOUR_DOMAIN_OR_APP_LANDING_PAGE">
+            Go to homepage
+          </a>
+        </div>
+
+        <div class="small" id="details"></div>
+      </main>
+    </div>
+
+    <script>
+      // ---------- CONFIG ----------
+      // Replace these:
+      const APP_LINK = "APP_LINK"; // e.g. "myapp://verified" or "https://yourapp.com/login"
+      const AUTO_REDIRECT_SECONDS = 0; // set to e.g. 3 to auto-redirect to APP_LINK
+
+      // ---------- Helpers ----------
+      function parseParams() {
+        const query = new URLSearchParams(window.location.search);
+        const hashRaw = window.location.hash.startsWith("#") ? window.location.hash.slice(1) : "";
+        const hash = new URLSearchParams(hashRaw);
+
+        // Combine (query wins if both have same key)
+        const params = new Map();
+        for (const [k, v] of hash.entries()) params.set(k, v);
+        for (const [k, v] of query.entries()) params.set(k, v);
+
+        return params;
+      }
+
+      function getParam(params, keys) {
+        for (const k of keys) {
+          if (params.has(k)) return params.get(k);
+        }
+        return null;
+      }
+
+      function setSuccessUI(extra) {
+        document.getElementById("badge").classList.remove("error");
+        document.getElementById("badgeIcon").textContent = "✅";
+        document.getElementById("badgeText").textContent = "Email verified";
+        document.getElementById("title").textContent = "You’re all set!";
+        document.getElementById("message").textContent =
+          "Your email address has been successfully verified. You’re ready to start using the app.";
+        document.getElementById("details").textContent = extra ? extra : "You can close this tab if you’re done.";
+      }
+
+      function setErrorUI(reason) {
+        document.getElementById("badge").classList.add("error");
+        document.getElementById("badgeIcon").textContent = "⚠️";
+        document.getElementById("badgeText").textContent = "Verification issue";
+        document.getElementById("title").textContent = "We couldn’t verify your email";
+        document.getElementById("message").textContent =
+          "That verification link may be expired or already used. Try requesting a new verification email in the app.";
+        document.getElementById("details").textContent = reason ? `Details: ${reason}` : "";
+      }
+
+      // ---------- Main ----------
+      (function init() {
+        document.getElementById("openAppBtn").setAttribute("href", APP_LINK);
+
+        const params = parseParams();
+
+        // Common patterns across providers:
+        const error =
+          getParam(params, ["error", "error_description", "message", "reason"]) ||
+          (params.get("status") === "error" ? "status=error" : null);
+
+        const success =
+          params.get("status") === "success" ||
+          params.get("verified") === "true" ||
+          params.get("success") === "true" ||
+          params.get("type") === "signup" || // some providers include a type on success
+          false;
+
+        if (error) {
+          setErrorUI(error);
+        } else {
+          // Default to success UI — since your provider should only redirect here after verifying.
+          setSuccessUI(success ? "" : "");
+        }
+
+        if (AUTO_REDIRECT_SECONDS > 0 && APP_LINK && APP_LINK !== "APP_LINK") {
+          setTimeout(() => {
+            window.location.href = APP_LINK;
+          }, AUTO_REDIRECT_SECONDS * 1000);
+
+          document.getElementById("details").textContent =
+            `Redirecting to the app in ${AUTO_REDIRECT_SECONDS} seconds… If nothing happens, tap “Open the app”.`;
+        }
+
+        // Optional: display a safe hint of params (avoid printing tokens)
+        // If you want debugging, you can show only non-sensitive keys:
+        const safeKeys = ["status", "verified", "success", "type"];
+        const safeFound = safeKeys.filter(k => params.has(k)).map(k => `${k}=${params.get(k)}`);
+        if (safeFound.length) {
+          const el = document.getElementById("details");
+          el.textContent = (el.textContent ? el.textContent + " " : "") + `(${safeFound.join(", ")})`;
+        }
+      })();
+    </script>
+  </body>
+</html>
